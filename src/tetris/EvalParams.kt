@@ -30,13 +30,13 @@ fun EvalParamsManualGood() = EvalParams(-0.7, -0.4, -0.05, -2.0, -0.7, -0.5, 1.0
 
 // Blend all parameters
 fun blend(a: EvalParams, b: EvalParams, r: Random) = EvalParams(
-    blxAlpha(a.heightMaxCoeff,              b.heightMaxCoeff,               r),
-    blxAlpha(a.heightMeanCoeff,             b.heightMeanCoeff,              r),
-    blxAlpha(a.heightVarCoeff,              b.heightVarCoeff,               r),
-    blxAlpha(a.holeCoeff,                    b.holeCoeff,                     r),
-    blxAlpha(a.holeDepthPenaltyCoeff,      b.holeDepthPenaltyCoeff,       r),
-    blxAlpha(a.parityCoeff,                  b.parityCoeff,                  r),
-    blxAlpha(a.erasableLinesByIPieceCoeff, b.erasableLinesByIPieceCoeff, r)
+    blxAlpha(a.heightMaxCoeff,              b.heightMaxCoeff,             r),
+    blxAlpha(a.heightMeanCoeff,             b.heightMeanCoeff,            r),
+    blxAlpha(a.heightVarCoeff,              b.heightVarCoeff,             r),
+    blxAlpha(a.holeCoeff,                   b.holeCoeff,                  r),
+    blxAlpha(a.holeDepthPenaltyCoeff,       b.holeDepthPenaltyCoeff,      r),
+    blxAlpha(a.parityCoeff,                 b.parityCoeff,                r),
+    blxAlpha(a.erasableLinesByIPieceCoeff,  b.erasableLinesByIPieceCoeff, r)
 )
 
 // Blend each parameter using BLX-alpha method

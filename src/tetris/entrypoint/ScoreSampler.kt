@@ -1,19 +1,21 @@
-package tetris
+package tetris.entrypoint
 
+import com.beust.klaxon.Klaxon
+import tetris.EvalParams
+import tetris.InstanceBeam
 import java.io.FileWriter
 import java.util.Random
-import kotlin.math.min
 
 // Entry point
 fun main(args: Array<String>) {
   val param = EvalParams(
-      heightMaxCoeff=-0.01874245677636222,
-      heightMeanCoeff=-0.04085781504556378,
-      heightVarCoeff=-0.008293916454396812,
-      holeCoeff=-0.08156931832466235,
-      holeDepthPenaltyCoeff=-0.018919118549830517,
-      parityCoeff=-0.0026200600157692796,
-      erasableLinesByIPieceCoeff=0.07530264712132304
+      heightMaxCoeff = -0.01874245677636222,
+      heightMeanCoeff = -0.04085781504556378,
+      heightVarCoeff = -0.008293916454396812,
+      holeCoeff = -0.08156931832466235,
+      holeDepthPenaltyCoeff = -0.018919118549830517,
+      parityCoeff = -0.0026200600157692796,
+      erasableLinesByIPieceCoeff = 0.07530264712132304
   )
 
   val forward = 100

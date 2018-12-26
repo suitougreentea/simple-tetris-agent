@@ -3,16 +3,16 @@ package tetris
 import java.lang.IllegalArgumentException
 import java.util.*
 
-data class InstanceResultMean(val success: Boolean, val score: Int, val instance: InstanceMean)
+data class InstanceExpectiMaxResult(val success: Boolean, val score: Int, val instance: InstanceExpectiMax)
 
-class InstanceMean(val sequence: Array<Int>, val params: EvalParams, val visibleMinos: Int, val minoBranchDepth: Int) {
+class InstanceExpectiMax(val sequence: Array<Int>, val params: EvalParams, val visibleMinos: Int, val minoBranchDepth: Int) {
   // Game field is initialized empty
   val field = emptyField()
   var score = 0
   val random = Random(641152)
   val history = mutableListOf<HistoryMean>()
 
-  fun run(): InstanceResultMean {
+  fun run(): InstanceExpectiMaxResult {
     // Main loop
     for (i in 0..sequence.size-10) {
       println(i)
@@ -61,7 +61,7 @@ class InstanceMean(val sequence: Array<Int>, val params: EvalParams, val visible
         }
 
       val result = dfs(field, sequence.slice(i until i+visibleMinos), minoBranchDepth)
-      if (result == null) return InstanceResultMean(false, score, this)
+      if (result == null) return InstanceExpectiMaxResult(false, score, this)
       val placement = result.placement!!
 
       // Set mino on the best position; calculate score
@@ -69,17 +69,11 @@ class InstanceMean(val sequence: Array<Int>, val params: EvalParams, val visible
       val lines = field.eraseLine()
       score += Data.score[lines]
 
-      // Output status if FileWriter is given
-      /*writer?.let {
-        it.write("Mino: ${Data.minoName[searchMinoIds[0]]}, Score: ${score}, Field: ${chooseNode.evalScore}\n")
-        it.write(field.prettify())
-        it.write("\n")
-      }*/
       val evalScore = field.evaluate(params)
       history.add(HistoryMean(field.cloneDeep(), evalScore, score))
     }
     // When all minoes are placed
-    return InstanceResultMean(true, score, this)
+    return InstanceExpectiMaxResult(true, score, this)
   }
 }
 

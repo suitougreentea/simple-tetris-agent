@@ -1,7 +1,13 @@
-package tetris
+package tetris.entrypoint
 
+import tetris.EvalParamsRandom
+import tetris.InstanceGreedy
+import tetris.InstanceGreedyResult
+import tetris.blend
 import java.io.FileWriter
 import java.util.Random
+
+data class InstanceResultPair(val instance: InstanceGreedy, val result: InstanceGreedyResult)
 
 // Entry point
 fun main(args: Array<String>) {
@@ -17,27 +23,27 @@ fun main(args: Array<String>) {
     // Sequence of mino (shared with all instances within a generation)
     val sequence = Array(500) { random.nextInt(7) }
     // Create game instances with specified sequence and parameters
-    val instances = params.map { Instance(sequence, it) }
+    val instances = params.map { InstanceGreedy(sequence, it) }
     // Run all instances and store results
-    val results = instances.map { it.run(null) }
+    val results = instances.map { InstanceResultPair(it, it.run(null)) }
     // Sort by final score
-    val resultsSorted = results.sortedByDescending { it.score }
+    val resultsSorted = results.sortedByDescending { it.result.score }
 
     // Output rankings
     println("*** Generation ${n} ***")
     resultsSorted.forEach {
-      println("${if (it.success) "*" else " "} ${it.score} ${it.instance.params}")
+      println("${if (it.result.success) "*" else " "} ${it.result.score} ${it.instance.params}")
     }
     println()
 
     // Define roulette selection
-    val rouletteSum = results.sumBy { it.score }
+    val rouletteSum = results.sumBy { it.result.score }
     fun roulette(): Int {
       val roulette = random.nextDouble() * rouletteSum
       var rouletteAccum = 0.0
       var rouletteIndex = 0
       for (it in resultsSorted) {
-        rouletteAccum += it.score
+        rouletteAccum += it.result.score
         if (roulette <= rouletteAccum) return rouletteIndex
         rouletteIndex ++
       }
@@ -46,7 +52,7 @@ fun main(args: Array<String>) {
 
     // Output run of elitest instance to .log file
     val writer = FileWriter("${n}.log", false)
-    Instance(sequence, resultsSorted[0].instance.params).run(writer)
+    InstanceGreedy(sequence, resultsSorted[0].instance.params).run(writer)
     writer.close()
 
     // Choose parameters for next generation

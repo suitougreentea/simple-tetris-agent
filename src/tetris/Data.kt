@@ -53,6 +53,5 @@ object Data {
   }
 
   // Score increments for each lines
-  //val score = arrayOf(0, 40, 100, 300, 1200)
-  val score = arrayOf(0, 1, 2, 3, 4)
+  val score = arrayOf(0, 40, 100, 300, 1200)
 }

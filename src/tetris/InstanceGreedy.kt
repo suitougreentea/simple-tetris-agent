@@ -2,15 +2,15 @@ package tetris
 
 import java.io.FileWriter
 
-data class InstanceResult(val success: Boolean, val score: Int, val instance: Instance)
+data class InstanceGreedyResult(val success: Boolean, val score: Int)
 
 // An instance runs game automatically with specified mino sequence and evaluation parameters
-class Instance(val sequence: Array<Int>, val params: EvalParams) {
+class InstanceGreedy(val sequence: Array<Int>, val params: EvalParams) {
   // Game field is initialized empty
   val field = emptyField()
   var score = 0
 
-  fun run(writer: FileWriter?): InstanceResult {
+  fun run(writer: FileWriter?): InstanceGreedyResult {
     // Output status if FileWriter is given
     writer?.let {
       it.write("Instance with parameter: ${params}\n")
@@ -46,7 +46,7 @@ class Instance(val sequence: Array<Int>, val params: EvalParams) {
       }
 
       // If no candidate found, the game cannot be run more
-      if (bestPoint == null) return InstanceResult(false, score, this)
+      if (bestPoint == null) return InstanceGreedyResult(false, score)
 
       // Set mino on the best position; calculate score
       field.setMino(minoId, bestState, bestX, bestY)
@@ -61,7 +61,7 @@ class Instance(val sequence: Array<Int>, val params: EvalParams) {
       }
     }
     // When all minoes are placed
-    return InstanceResult(true, score, this)
+    return InstanceGreedyResult(true, score)
   }
 
 }
