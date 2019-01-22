@@ -3,21 +3,21 @@ package tetris
 import java.lang.IllegalArgumentException
 import java.util.*
 
-data class InstanceExpectiMaxResult(val success: Boolean, val score: Int, val instance: InstanceExpectiMax)
-
-class InstanceExpectiMax(val sequence: Array<Int>, val params: EvalParams, val visibleMinos: Int, val minoBranchDepth: Int) {
+class InstanceExpectiMax(val sequence: SequenceGenerator, val params: EvalParams, val visibleMinos: Int, val minoBranchDepth: Int, val scoreFunction: (Double, Int) -> Double): Instance {
   // Game field is initialized empty
   val field = emptyField()
   var score = 0
-  val random = Random(641152)
-  val history = mutableListOf<HistoryMean>()
+  var lines = 0
+  val _history = mutableListOf<InstanceHistory>()
+  override fun getHistory() = _history
 
-  fun run(): InstanceExpectiMaxResult {
+  override fun run(): InstanceResult {
     // Main loop
-    for (i in 0..sequence.size-10) {
-      println(i)
+    var i = 0
+    while (true) {
+      //println(i)
 
-      fun dfs(field: Field, visibleSequence: List<Int>, branchDepth: Int): SearchResult? =
+      fun dfs(field: Field, currentScore: Int, visibleSequence: List<Int>, branchDepth: Int): SearchResult? =
         if (visibleSequence.isNotEmpty()) {
           //println("${visibleSequence} ${branchDepth}")
           val minoId = visibleSequence[0]
@@ -27,25 +27,25 @@ class InstanceExpectiMax(val sequence: Array<Int>, val params: EvalParams, val v
               val candidateField = field.cloneDeep()
               val y = candidateField.findDropY(minoId, state, x)
               val success = candidateField.setMino(minoId, state, x, y)
-              val lines = candidateField.eraseLine()
+              val justErasedLines = candidateField.eraseLine()
+              val newScore = currentScore + Data.score[justErasedLines]
               if (success) {
                 val data = PlacementData(minoId, state, x, y)
                 if (branchDepth == 0) {
                   val evalScore = candidateField.evaluate(params)
                   Pair(SearchResult(evalScore, null), data)
-                } else dfs(candidateField, visibleSequence.drop(1), branchDepth)?.let { Pair(it, data) }
+                } else dfs(candidateField, newScore, visibleSequence.drop(1), branchDepth)?.let { Pair(it, data) }
               }
               else null
             }
           }.flatten()
           if (visibleSequence.size == visibleMinos) {
             // Top level
-            println(candidates)
-            candidates.maxBy { it.first.score }?.let {
+            candidates.maxBy { scoreFunction(it.first.score, currentScore) }?.let {
               SearchResult(Double.NEGATIVE_INFINITY, it.second)
             }
           } else {
-            candidates.maxBy { it.first.score }?.first
+            candidates.maxBy { scoreFunction(it.first.score, currentScore) }?.first
           }
         } else {
           //println("${visibleSequence} ${branchDepth}")
@@ -53,36 +53,35 @@ class InstanceExpectiMax(val sequence: Array<Int>, val params: EvalParams, val v
             throw IllegalArgumentException()
           } else {
             val candidates = (0..6).mapNotNull { minoId ->
-              dfs(field, listOf(minoId), branchDepth - 1)
+              dfs(field, currentScore, listOf(minoId), branchDepth - 1)
             }
             if (candidates.isEmpty()) null
             else SearchResult(candidates.map { it.score }.average(), null)
           }
         }
 
-      val result = dfs(field, sequence.slice(i until i+visibleMinos), minoBranchDepth)
-      if (result == null) return InstanceExpectiMaxResult(false, score, this)
+      val visibleSequence = sequence.slice(i until i+visibleMinos)
+      if (visibleSequence.any { it == null }) {
+        // When all minoes are placed
+        return InstanceResult(true)
+      }
+      visibleSequence as List<Int> // Guaranteed no null element
+      val result = dfs(field, score, visibleSequence, minoBranchDepth)
+      if (result == null) return InstanceResult(false)
       val placement = result.placement!!
 
       // Set mino on the best position; calculate score
       field.setMino(placement.minoId, placement.state, placement.x, placement.y)
-      val lines = field.eraseLine()
-      score += Data.score[lines]
+      val justErasedLines = field.eraseLine()
+      score += Data.score[justErasedLines]
+      lines += justErasedLines
 
       val evalScore = field.evaluate(params)
-      history.add(HistoryMean(field.cloneDeep(), evalScore, score))
+      _history.add(InstanceHistory(field.cloneDeep(), evalScore, score, lines))
+      i++
     }
-    // When all minoes are placed
-    return InstanceExpectiMaxResult(true, score, this)
   }
 }
 
-data class MinoNode(val parent: PlacementNode?, val minoId: Int)
-
-data class PlacementNode(val parent: Node?, val minoId: Int, val x: Int, val y: Int, val state: Int, val field: Field, val evalScore: Double, val gameScore: Int) {
-  //var children: List<Node> = emptyList()
-}
 data class PlacementData(val minoId: Int, val state: Int, val x: Int, val y: Int)
 data class SearchResult(val score: Double, val placement: PlacementData?)
-
-data class HistoryMean(val field: Field, val evalScore: Double, val gameScore: Int)

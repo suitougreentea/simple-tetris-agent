@@ -2,20 +2,15 @@ package tetris
 
 import java.io.FileWriter
 
-data class InstanceGreedyResult(val success: Boolean, val score: Int)
-
-// An instance runs game automatically with specified mino sequence and evaluation parameters
-class InstanceGreedy(val sequence: Array<Int>, val params: EvalParams) {
+// Used by ParamOptimizerGA
+// Equivalent to InstanceBreadthFirst(maxDepth = 1, beamWidth = Int.MAX_VALUE, beamScoreFunction = Instance.evalScoreFunction)
+class InstanceGreedy(val sequence: Array<Int>, val params: EvalParams): Instance {
   // Game field is initialized empty
   val field = emptyField()
   var score = 0
 
-  fun run(writer: FileWriter?): InstanceGreedyResult {
+  override fun run(): InstanceResult {
     // Output status if FileWriter is given
-    writer?.let {
-      it.write("Instance with parameter: ${params}\n")
-      it.write("Sequence: " + sequence.map { Data.minoName[it] }.joinToString("") + "\n")
-    }
 
     // Main loop
     for (minoId in sequence) {
@@ -46,23 +41,20 @@ class InstanceGreedy(val sequence: Array<Int>, val params: EvalParams) {
       }
 
       // If no candidate found, the game cannot be run more
-      if (bestPoint == null) return InstanceGreedyResult(false, score)
+      if (bestPoint == null) return InstanceResult(false)
 
       // Set mino on the best position; calculate score
       field.setMino(minoId, bestState, bestX, bestY)
       val lines = field.eraseLine()
       score += Data.score[lines]
 
-      // Output status if FileWriter is given
-      writer?.let {
-        it.write("Mino: ${Data.minoName[minoId]}, Score: ${score}, Field: ${bestPoint}\n")
-        it.write(field.prettify())
-        it.write("\n")
-      }
     }
     // When all minoes are placed
-    return InstanceGreedyResult(true, score)
+    return InstanceResult(true)
   }
 
+  override fun getHistory(): List<InstanceHistory> {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
 }
 

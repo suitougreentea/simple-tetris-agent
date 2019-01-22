@@ -36,22 +36,37 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-task param_optimizer_ga(dependsOn: classes, type: JavaExec) {
+// Entry points
+task run_ga(dependsOn: classes, type: JavaExec) {
     main = "tetris.entrypoint.ParamOptimizerGAKt"
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     ignoreExitValue = true
 }
 
-task run_instance(dependsOn: classes, type: JavaExec) {
-    main = "tetris.entrypoint.InstanceRunnerKt"
+task run_simple(dependsOn: classes, type: JavaExec) {
+    main = "tetris.entrypoint.SimpleRunnerKt"
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     ignoreExitValue = true
 }
 
-task run_sampler(dependsOn: classes, type: JavaExec) {
-    main = "tetris.entrypoint.ScoreSamplerKt"
+task run_sampler_infinite(dependsOn: classes, type: JavaExec) {
+    main = "tetris.entrypoint.SamplerInfiniteKt"
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    ignoreExitValue = true
+}
+
+task run_sampler_mixed(dependsOn: classes, type: JavaExec) {
+    main = "tetris.entrypoint.SamplerMixedKt"
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    ignoreExitValue = true
+}
+
+task run_sampler_mixed_exp(dependsOn: classes, type: JavaExec) {
+    main = "tetris.entrypoint.SamplerMixedExpKt"
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     ignoreExitValue = true
